@@ -1,0 +1,60 @@
+# AltumProb — Guía de setup completa
+# Las 3 cosas que tenés que hacer vos (todo lo demás ya está hecho)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCIÓN 1 — Crear cuenta en Supabase y configurar la base de datos
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ir a https://supabase.com → Sign Up (gratis con GitHub o email)
+2. Click "New project" → nombre: altumprob → elegir región: South America (São Paulo)
+3. Ir a SQL Editor (menú izquierdo) → pegar TODO el contenido del archivo supabase_setup.sql → Run
+4. Ir a Settings → API → copiar:
+   - "Project URL"  (algo como https://xxxx.supabase.co)
+   - "service_role secret" (el key más largo, NO el anon key)
+   Guardá esos dos valores, los necesitás en la Acción 3.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCIÓN 2 — Crear cuenta en Stripe y obtener las keys
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ir a https://stripe.com → Create account (gratis)
+2. En el dashboard, ir a Developers → API keys → copiar "Secret key" (empieza con sk_live_ o sk_test_)
+3. Crear los productos:
+   - Products → Add product → "AltumProb Pro" → $37/mes → recurring
+     Copiar el Price ID (empieza con price_...)
+   - Products → Add product → "AltumProb Institutional" → $370/mes → recurring
+     Copiar el Price ID
+4. Ir a Developers → Webhooks → Add endpoint:
+   URL: https://TU-APP.vercel.app/api/webhook
+   Events: checkout.session.completed + customer.subscription.deleted
+   Copiar el "Signing secret" (empieza con whsec_...)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCIÓN 3 — Deploy en Vercel con las variables de entorno
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ir a https://vercel.com → New Project → subir la carpeta altumprob_v2
+   (misma estructura que antes: vercel.json + api/ + public/)
+
+2. IMPORTANTE: antes de hacer Deploy, en la pantalla de configuración
+   hacer click en "Environment Variables" y agregar:
+
+   SUPABASE_URL              = (el Project URL de Supabase)
+   SUPABASE_SERVICE_KEY      = (el service_role secret de Supabase)
+   STRIPE_SECRET_KEY         = (el secret key de Stripe)
+   STRIPE_WEBHOOK_SECRET     = (el signing secret del webhook)
+   STRIPE_PRICE_PRO          = (el price_... del plan Pro)
+   STRIPE_PRICE_INST         = (el price_... del plan Institutional)
+
+3. Click Deploy → en 2 minutos tenés la URL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NOTA IMPORTANTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si Supabase o Stripe no están configurados todavía, la plataforma
+funciona igual en modo fallback (localStorage). Podés lanzar y
+empezar a capturar usuarios YA, y agregar los pagos después.
+
+Los datos de mercado funcionan 100% sin ninguna configuración extra
+— eso lo resuelve el backend de Vercel automáticamente.
